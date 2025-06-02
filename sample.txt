@@ -1,0 +1,8 @@
+This is a sample text file.
+It contains multiple lines of text.
+Used for testing the read_text_file function.
+The quick brown fox jumps over the lazy dog.
+1234567890
+!@#$%^&*()
+Encoding: UTF-8
+Voilà! 😊

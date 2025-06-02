@@ -1,0 +1,11 @@
+google-cloud-aiplatform
+google-cloud-documentai
+google-cloud-storage
+google-api-python-client
+pdfplumber
+requests
+beautifulsoup4
+langchain
+langchain-google-vertexai
+langchain-core
+langchain-community
