@@ -50,8 +50,24 @@ Once the setup is complete and environment variables are set, you can start the 
 ```bash
 python langchain_agent.py
 ```
-
 You should see a welcome message and a `User>` prompt.
+
+### Using Helper Scripts
+
+To simplify running the agent and ensure environment variables are checked, you can use the provided helper scripts:
+
+*   **For Linux/macOS:**
+    ```bash
+    ./run_agent.sh
+    ```
+    (If you get a permission error, run `chmod +x run_agent.sh` first.)
+
+*   **For Windows:**
+    ```bat
+    run_agent.bat
+    ```
+
+These scripts will check for some essential environment variables and then start `langchain_agent.py`. Any arguments passed to these scripts (e.g., `./run_agent.sh --some-arg`) will be forwarded to the Python agent script, though the agent currently does not process command-line arguments.
 
 ## 6. Interacting with the Agent
 
@@ -97,12 +113,13 @@ The agent uses several tools internally. For some operations, especially with `p
     3.  Select or create a processor (e.g., Form Parser, OCR Processor).
     4.  The "Processor ID" (and "Location") will be listed there.
 *   **Vertex AI Endpoint ID (for embeddings):**
-    *   For pre-trained Google models like Gecko, this is often the model name, e.g., `textembedding-gecko@003`.
-    *   If you have deployed your own model to a Vertex AI Endpoint:
+    The `get_embedding_tool` expects either:
+    *   A **pre-trained model name** that Vertex AI recognizes for embeddings, e.g., `textembedding-gecko@003`, `textembedding-gecko-multilingual@001`, etc.
+    *   The **numerical ID of a custom/private deployed Endpoint** if you have deployed your own embedding model on Vertex AI. To find this:
         1.  Go to the Google Cloud Console.
-        2.  Navigate to "Vertex AI" -> "Online Prediction" (or "Endpoints").
+        2.  Navigate to "Vertex AI" -> "Endpoints" (under the "Online Prediction" section).
         3.  Select your deployed endpoint.
-        4.  The Endpoint ID is usually a long number found on the endpoint's detail page.
+        4.  The Endpoint ID is a long number, typically found on the endpoint's detail page or as part of its resource name.
 *   **Google Cloud Storage Bucket Name:** This is the name of the bucket you created in your GCP project for the agent to use.
 *   **Project ID:** Your Google Cloud Project ID, visible in the Cloud Console.
 
@@ -126,4 +143,3 @@ The agent uses several tools internally. For some operations, especially with `p
 
 ---
 If you encounter further issues, check the console output from the agent (it runs with `verbose=True` by default) for detailed error messages and the agent's reasoning process.
-```
