@@ -1,0 +1,12 @@
+This is placeholder training data for the RAG chatbot.
+Please replace this content with your actual documents.
+
+The chatbot will use this information to answer your questions.
+For example, you could include:
+- Frequently Asked Questions (FAQs)
+- Product descriptions
+- Articles or book excerpts
+- Internal knowledge base documents
+
+The more comprehensive and relevant your data, the better the chatbot will perform.
+Make sure the text is clean and well-formatted for optimal results.
