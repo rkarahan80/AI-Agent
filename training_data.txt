@@ -1,3 +1,4 @@
+GREETING: Hello! Welcome to your friendly RAG chatbot.
 This is placeholder training data for the RAG chatbot.
 Please replace this content with your actual documents.
 
