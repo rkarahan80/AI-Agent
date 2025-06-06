@@ -15,10 +15,10 @@ if not OPENAI_API_KEY:
 
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import OpenAI
+# Removed direct OpenAIEmbeddings and OpenAI imports
 from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import Chroma, FAISS
+from ai_models import AIModel, OpenAIModel, JulesModel, MCPModel # Import AIModel, JulesModel, and MCPModel
 
 def load_documents(filepath="training_data.txt"):
     loader = TextLoader(filepath, encoding='utf-8') # Specify encoding
@@ -30,9 +30,22 @@ def split_documents(documents):
     texts = text_splitter.split_documents(documents)
     return texts
 
-def setup_rag_pipeline(texts, openai_api_key):
+def setup_rag_pipeline(texts, ai_model: AIModel): # Accept AIModel base class instance
     print("Initializing embeddings model...")
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    try:
+        embeddings = ai_model.get_embeddings() # Use ai_model
+    except NotImplementedError:
+        print(f"Error: The get_embeddings method for the selected AI model ({type(ai_model).__name__}) is not implemented.")
+        raise
+    except Exception as e:
+        print(f"Error getting embeddings from {type(ai_model).__name__}: {e}")
+        raise
+
+    if embeddings is None and type(ai_model).__name__ not in ["JulesModel", "MCPModel"]: # Allow placeholders to return None
+        # Added a check for JulesModel/MCPModel to avoid erroring out if it's the one returning None as per its placeholder nature.
+        # However, a fully functional system would expect a valid embeddings object or an explicit error.
+        print(f"Error: Embeddings object is None for {type(ai_model).__name__}, and it's not an expected placeholder behavior.")
+        raise ValueError("Embeddings object cannot be None for a functional RAG pipeline.")
 
     print("Initializing vector store...")
     vectorstore = None
@@ -44,7 +57,7 @@ def setup_rag_pipeline(texts, openai_api_key):
         print(f"Chroma initialization failed: {e_chroma}")
         print("Attempting to use FAISS vector store as fallback...")
         try:
-            vectorstore = FAISS.from_documents(texts, embeddings)
+            vectorstore = FAISS.from_documents(texts, embeddings) # embeddings is now the OpenAIEmbeddings instance
             print("Using FAISS vector store.")
         except Exception as e_faiss:
             print(f"FAISS initialization failed: {e_faiss}")
@@ -56,7 +69,22 @@ def setup_rag_pipeline(texts, openai_api_key):
         raise RuntimeError("Vector store initialization failed.")
 
     print("Initializing LLM...")
-    llm = OpenAI(openai_api_key=openai_api_key)
+    try:
+        llm = ai_model.generate_response() # Use ai_model
+    except NotImplementedError:
+        print(f"Error: The generate_response method for the selected AI model ({type(ai_model).__name__}) is not implemented.")
+        raise
+    except Exception as e:
+        print(f"Error getting LLM from {type(ai_model).__name__}: {e}")
+        raise
+
+    if llm is None and type(ai_model).__name__ not in ["JulesModel", "MCPModel"]: # Similar check for LLM for placeholders
+        print(f"Error: LLM object is None for {type(ai_model).__name__}, and it's not an expected placeholder behavior.")
+        raise ValueError("LLM object cannot be None for a functional RAG pipeline.")
+
+    # If embeddings or llm is None here, it implies a placeholder model (JulesModel or MCPModel) is selected
+    # and returned None (as per current placeholder design, though they raise NotImplementedError).
+    # The RAG chain setup will likely fail if these are None. This is acceptable for this subtask.
 
     print("Creating retriever...")
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
@@ -75,15 +103,42 @@ def setup_rag_pipeline(texts, openai_api_key):
 def main():
     print("Starting RAG chatbot application...")
 
-    # Fetch API key at the start of main, to ensure it's available for this session.
-    # The global OPENAI_API_KEY is checked at module load, but good to have it explicitly for main's logic.
-    current_openai_api_key = os.getenv('OPENAI_API_KEY')
-    if not current_openai_api_key and 'OPENAI_API_KEY' in os.environ:
-        current_openai_api_key = os.environ['OPENAI_API_KEY']
+    # Determine AI model provider
+    ai_provider = os.getenv('AI_MODEL_PROVIDER', 'OPENAI').upper() # Default to OPENAI
+    ai_model_instance: AIModel # Type hint for clarity
 
-    if not current_openai_api_key:
-        print("CRITICAL: OpenAI API Key not found in environment when starting main(). The script cannot run.")
-        print("Please ensure OPENAI_API_KEY is set as an environment variable.")
+    if ai_provider == 'OPENAI':
+        current_openai_api_key = OPENAI_API_KEY # Use the globally checked key
+        if not current_openai_api_key:
+            print("CRITICAL: OpenAI API Key (OPENAI_API_KEY) not found for OpenAI model. The script cannot run.")
+            print("Please ensure OPENAI_API_KEY is set as an environment variable.")
+            return
+        try:
+            ai_model_instance = OpenAIModel(api_key=current_openai_api_key)
+            print("Using OpenAI model.")
+        except Exception as e:
+            print(f"Error instantiating OpenAIModel: {e}")
+            return
+    elif ai_provider == 'JULES':
+        # Assuming Jules might use a different API key or no key for this example
+        jules_api_key = os.getenv('JULES_API_KEY', 'dummy_jules_key') # Example for Jules API key
+        try:
+            ai_model_instance = JulesModel(api_key=jules_api_key)
+            print("Using Jules model (placeholder).")
+        except Exception as e:
+            print(f"Error instantiating JulesModel: {e}")
+            return
+    elif ai_provider == 'MCP':
+        # Assuming MCP might use a different API key or no key for this example
+        mcp_api_key = os.getenv('MCP_API_KEY', 'dummy_mcp_key') # Example for MCP API key
+        try:
+            ai_model_instance = MCPModel(api_key=mcp_api_key)
+            print("Using MCP model (placeholder).")
+        except Exception as e:
+            print(f"Error instantiating MCPModel: {e}")
+            return
+    else:
+        print(f"Error: Unknown AI_MODEL_PROVIDER '{ai_provider}'. Please use 'OPENAI', 'JULES', or 'MCP'.")
         return
 
     try:
@@ -108,7 +163,12 @@ def main():
 
     try:
         print("Setting up the RAG pipeline. This may take a moment for embedding generation...")
-        qa_chain = setup_rag_pipeline(texts, current_openai_api_key)
+        # Pass the chosen ai_model_instance to the RAG pipeline setup
+        qa_chain = setup_rag_pipeline(texts, ai_model_instance)
+    except NotImplementedError:
+        print("Cannot proceed with RAG pipeline due to unimplemented methods in the selected AI model.")
+        print(f"If using {type(ai_model_instance).__name__}, this is expected if it's a placeholder.")
+        return # Exit if core model functionalities are not implemented
     except RuntimeError as e:
         print(f"Failed to set up RAG pipeline: {e}")
         return

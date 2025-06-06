@@ -5,8 +5,9 @@ This project implements a command-line Retrieval Augmented Generation (RAG) chat
 ## Features
 
 - Answers questions based on the content of `training_data.txt`.
-- Uses OpenAI for language understanding and generation.
-- Uses OpenAI embeddings and a local vector store (ChromaDB or FAISS) for efficient retrieval.
+- Uses OpenAI for language understanding and generation (by default).
+- Uses OpenAI embeddings (by default) and a local vector store (ChromaDB or FAISS) for efficient retrieval.
+- Pluggable AI model architecture (currently supporting OpenAI, with placeholders for Google Jules and MCP).
 
 ## Setup and Usage
 
@@ -15,18 +16,43 @@ This project implements a command-line Retrieval Augmented Generation (RAG) chat
 - Access to an OpenAI API key.
 
 ### 2. Environment Variables
-You **must** set your OpenAI API key as an environment variable.
+You need to configure environment variables to specify your chosen AI model provider and the necessary API keys.
+
+-   **`OPENAI_API_KEY`**: Required if using the OpenAI model (default). Replace `your_actual_openai_api_key_here` with your real key.
+-   **`AI_MODEL_PROVIDER`**: Specifies which AI model to use.
+    -   Supported values: `OPENAI` (default), `JULES`, `MCP`.
+    -   Example: `export AI_MODEL_PROVIDER='OPENAI'`
+-   **`JULES_API_KEY`**: (Future Use) Will be required if `AI_MODEL_PROVIDER` is set to `JULES` once the model is implemented. For now, a dummy value is used if not set.
+-   **`MCP_API_KEY`**: (Future Use) Will be required if `AI_MODEL_PROVIDER` is set to `MCP` once the model is implemented. For now, a dummy value is used if not set.
+
 
 **Linux/macOS:**
 ```bash
 export OPENAI_API_KEY='your_actual_openai_api_key_here'
+export AI_MODEL_PROVIDER='OPENAI' # Or 'JULES', 'MCP'
+# export JULES_API_KEY='your_jules_key_here' # When Jules is implemented
+# export MCP_API_KEY='your_mcp_key_here'     # When MCP is implemented
 ```
 
 **Windows (PowerShell):**
 ```powershell
 $Env:OPENAI_API_KEY='your_actual_openai_api_key_here'
+$Env:AI_MODEL_PROVIDER='OPENAI' # Or 'JULES', 'MCP'
+# $Env:JULES_API_KEY='your_jules_key_here' # When Jules is implemented
+# $Env:MCP_API_KEY='your_mcp_key_here'     # When MCP is implemented
 ```
-Replace `your_actual_openai_api_key_here` with your real key. You might want to add this line to your shell's profile file (e.g., `.bashrc`, `.zshrc`, or PowerShell profile) for persistence.
+You might want to add these lines to your shell's profile file (e.g., `.bashrc`, `.zshrc`, or PowerShell profile) for persistence.
+
+## AI Model Configuration
+
+This application supports a pluggable AI model architecture, allowing you to choose from different AI providers. The selection is controlled by the `AI_MODEL_PROVIDER` environment variable.
+
+-   **`AI_MODEL_PROVIDER`**:
+    -   `OPENAI`: Uses OpenAI's models for embeddings and language generation. Requires `OPENAI_API_KEY`. This is the default if the variable is not set.
+    -   `JULES`: Placeholder for a hypothetical "Jules" AI model. Currently, this is a non-functional placeholder. If selected, the application will indicate this and will not be able to process queries.
+    -   `MCP`: Placeholder for a hypothetical "MCP" AI model. Similar to `JULES`, this is a non-functional placeholder.
+
+The core abstraction is defined in `ai_models.py` with the `AIModel` base class. Developers can extend this by adding new classes that implement the required methods (`get_embeddings`, `generate_response`) for other AI services.
 
 ### 3. Training Data
 - Locate the `training_data.txt` file in the root directory of this project.
@@ -61,6 +87,3 @@ These dependencies are listed in `requirements.txt`. Due to potential environmen
 pip install langchain openai langchain_community tiktoken faiss-cpu chromadb
 ```
 (Note: `faiss-cpu` and `chromadb` are the primary vector store options the script tries. You might only need one depending on what works in your environment.)
-
----
-# AI-Agent
