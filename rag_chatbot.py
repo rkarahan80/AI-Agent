@@ -22,8 +22,28 @@ from langchain_community.vectorstores import Chroma, FAISS
 
 def load_documents(filepath="training_data.txt"):
     loader = TextLoader(filepath, encoding='utf-8') # Specify encoding
-    documents = loader.load()
-    return documents
+    all_docs = loader.load()
+
+    greeting_message = "Welcome to the RAG Chatbot!" # Default greeting
+    processed_documents = []
+
+    if all_docs:
+        first_doc_content = all_docs[0].page_content
+        if first_doc_content.startswith("GREETING: "):
+            greeting_message = first_doc_content[len("GREETING: "):].strip()
+            # If there are more documents, they are the actual documents
+            if len(all_docs) > 1:
+                processed_documents = all_docs[1:]
+            # If only the greeting line existed, documents list remains empty
+            # This is handled by returning processed_documents which would be []
+        else:
+            # No greeting line, so all loaded documents are actual documents
+            processed_documents = all_docs
+
+    # if all_docs was empty, processed_documents remains empty, greeting is default.
+    # This is fine.
+
+    return greeting_message, processed_documents
 
 def split_documents(documents):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, add_start_index=True)
@@ -88,9 +108,11 @@ def main():
 
     try:
         print("Loading documents...")
-        documents = load_documents()
-        if not documents:
-            print("No documents found or loaded from training_data.txt. The file might be empty or missing.")
+        greeting, documents = load_documents() # Updated call
+        if not documents: # Check documents specifically
+            print("No documents found or loaded from training_data.txt (excluding potential greeting line). The file might be empty or effectively empty.")
+            # Depending on desired behavior, you might still want to run the chatbot if only a greeting exists.
+            # For now, if documents list is empty, we exit.
             return
     except Exception as e:
         print(f"Error loading documents: {e}")
@@ -116,7 +138,7 @@ def main():
         print(f"An unexpected error occurred during RAG pipeline setup: {e}")
         return
 
-    print("\nWelcome to the RAG Chatbot!")
+    print(f"\n{greeting}") # Use the greeting variable
     print("The chatbot is ready. Type your question and press Enter.")
     print("Type 'exit' or 'quit' to end the session.\n")
 
