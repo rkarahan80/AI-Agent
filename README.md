@@ -1,11 +1,13 @@
-# Simple RAG Chatbot
+# RAG Chatbot with Agent Development Kit (ADK)
 
-This project implements a command-line Retrieval Augmented Generation (RAG) chatbot using Python, Langchain, and OpenAI.
+This project implements a command-line and web-ui enabled Retrieval Augmented Generation (RAG) chatbot using Python, Langchain, OpenAI, and Google's Agent Development Kit (ADK).
 
 ## Features
 
 - Answers questions based on the content of `training_data.txt`.
-- Uses OpenAI for language understanding and generation.
+- Uses OpenAI for language understanding and generation, integrated via Langchain.
+- Leverages Google's Agent Development Kit for agent structure and execution.
+- Provides interaction via command-line (`adk run`) or a web UI (`adk web`).
 - Uses OpenAI embeddings and a local vector store (ChromaDB or FAISS) for efficient retrieval.
 
 ## Setup and Usage
@@ -13,54 +15,57 @@ This project implements a command-line Retrieval Augmented Generation (RAG) chat
 ### 1. Prerequisites
 - Python 3.7+
 - Access to an OpenAI API key.
+- Git (for cloning the repository).
 
-### 2. Environment Variables
-You **must** set your OpenAI API key as an environment variable.
+### 2. Clone the Repository
+If you haven't already, clone this repository to your local machine.
 
-**Linux/macOS:**
+### 3. Install Dependencies
+Navigate to the project's root directory in your terminal and install the required Python packages:
 ```bash
-export OPENAI_API_KEY='your_actual_openai_api_key_here'
+pip install -r requirements.txt
 ```
+This will install all necessary libraries, including `langchain`, `openai`, `google-adk`, `litellm`, and others.
 
-**Windows (PowerShell):**
-```powershell
-$Env:OPENAI_API_KEY='your_actual_openai_api_key_here'
-```
-Replace `your_actual_openai_api_key_here` with your real key. You might want to add this line to your shell's profile file (e.g., `.bashrc`, `.zshrc`, or PowerShell profile) for persistence.
+### 4. Set Up OpenAI API Key
+The agent requires an OpenAI API key to function. You need to place this key in a dedicated `.env` file:
+   - Navigate to the `rag_adk_agent` directory within the project.
+   - Create a file named `.env` (if it doesn't already exist).
+   - Add the following line to the `.env` file, replacing `YOUR_ACTUAL_OPENAI_API_KEY_HERE` with your real key:
+     ```
+     OPENAI_API_KEY="YOUR_ACTUAL_OPENAI_API_KEY_HERE"
+     ```
+   - **Important**: Ensure this file is saved and the key is correct. Do not commit your API key to version control if you're managing this project with Git. The `.gitignore` file should ideally list `rag_adk_agent/.env`.
 
-### 3. Training Data
+### 5. Prepare Training Data
 - Locate the `training_data.txt` file in the root directory of this project.
 - **Replace the placeholder content in `training_data.txt` with your own text data.** This data will be used by the chatbot to answer questions. The quality and relevance of this data are crucial for the chatbot's performance.
 - Ensure the file is saved with UTF-8 encoding if you are adding non-ASCII characters.
 
-### 4. Running the Chatbot
-Once the `OPENAI_API_KEY` is set and `training_data.txt` is populated, you can run the chatbot:
+### 6. Running the Chatbot with ADK
 
+Once the dependencies are installed, the API key is set in `rag_adk_agent/.env`, and `training_data.txt` is populated, you can run the chatbot using ADK commands from the **root directory** of the project:
+
+**Option 1: Command-Line Interface**
 ```bash
-python rag_chatbot.py
+adk run rag_adk_agent
 ```
-
-The script will:
-1. Load and process your data from `training_data.txt`.
-2. Initialize the RAG pipeline (this might take a moment, especially the first time when embeddings are generated).
-3. Prompt you to enter your questions.
-
+This command will:
+1. Load the ADK agent defined in the `rag_adk_agent` directory.
+2. Initialize the RAG pipeline (this might take a moment, especially the first time when embeddings for your data are generated).
+3. Provide a command-line prompt for you to enter questions.
 Type your question and press Enter. Type `exit` or `quit` to close the chatbot.
 
-### 5. Dependencies
-The script uses the following major Python libraries:
-- `langchain`
-- `openai`
-- `langchain_community` (for TextLoader, Chroma, FAISS)
-- `tiktoken` (tokenizer for OpenAI models)
-- `faiss-cpu` (optional, if Chroma fails or for FAISS vector store)
-- `chromadb` (optional, for Chroma vector store)
-
-These dependencies are listed in `requirements.txt`. Due to potential environment limitations during automated setup, a virtual environment might not have been created automatically. If you encounter import errors, you may need to install these packages manually in your Python environment:
+**Option 2: Web User Interface**
 ```bash
-pip install langchain openai langchain_community tiktoken faiss-cpu chromadb
+adk web
 ```
-(Note: `faiss-cpu` and `chromadb` are the primary vector store options the script tries. You might only need one depending on what works in your environment.)
+This command will:
+1. Start a local web server (usually at `http://localhost:8000` or `http://127.0.0.1:8000`).
+2. Open the ADK development UI in your web browser.
+3. In the UI, select "rag_chatbot_agent" from the agent dropdown list.
+4. You can then interact with the chatbot through the web interface, which may also offer options to inspect agent events and traces.
+Follow the on-screen instructions to interact. To stop the server, press `Ctrl+C` in the terminal where you ran `adk web`.
 
 ---
 # AI-Agent
