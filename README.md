@@ -67,5 +67,20 @@ This command will:
 4. You can then interact with the chatbot through the web interface, which may also offer options to inspect agent events and traces.
 Follow the on-screen instructions to interact. To stop the server, press `Ctrl+C` in the terminal where you ran `adk web`.
 
+## Running the Streamlit GUI Chatbot
+
+This project also includes a standalone graphical user interface (GUI) for the RAG chatbot, built with Streamlit. This provides an alternative way to interact with the chatbot without using the ADK.
+
+**Prerequisites:**
+- Ensure all dependencies are installed by running `pip install -r requirements.txt` from the project root. This includes Streamlit and all necessary Langchain components.
+- The `OPENAI_API_KEY` environment variable must be set. You can set this in your terminal session (e.g., `export OPENAI_API_KEY='your_key_here'`) or by creating a `.env` file in the project root containing `OPENAI_API_KEY='your_key_here'`, which the Streamlit script will attempt to load for local development.
+
+**Running the GUI:**
+To start the Streamlit application, navigate to the project's root directory in your terminal and run:
+```bash
+streamlit run gui_chatbot_streamlit.py
+```
+This will typically open the chatbot interface in your default web browser. If it doesn't open automatically, the terminal output will provide a local URL (usually `http://localhost:8501`) that you can navigate to.
+
 ---
 # AI-Agent

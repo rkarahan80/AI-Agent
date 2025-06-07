@@ -5,3 +5,7 @@ sentence-transformers
 tiktoken
 google-adk
 litellm
+streamlit
+langchain-community
+langchain-openai
+chromadb
