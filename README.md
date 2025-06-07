@@ -69,18 +69,37 @@ Follow the on-screen instructions to interact. To stop the server, press `Ctrl+C
 
 ## Running the Streamlit GUI Chatbot
 
-This project also includes a standalone graphical user interface (GUI) for the RAG chatbot, built with Streamlit. This provides an alternative way to interact with the chatbot without using the ADK.
+This project also includes a standalone graphical user interface (GUI) for the RAG chatbot, built with Streamlit. This provides an alternative way to interact with the chatbot, now with support for multiple Large Language Models (LLMs).
 
 **Prerequisites:**
-- Ensure all dependencies are installed by running `pip install -r requirements.txt` from the project root. This includes Streamlit and all necessary Langchain components.
-- The `OPENAI_API_KEY` environment variable must be set. You can set this in your terminal session (e.g., `export OPENAI_API_KEY='your_key_here'`) or by creating a `.env` file in the project root containing `OPENAI_API_KEY='your_key_here'`, which the Streamlit script will attempt to load for local development.
+
+1.  **Install Dependencies:**
+    Ensure all dependencies, including Streamlit and new LLM provider packages (like `langchain-google-genai`, `langchain-anthropic`, `langchain-deepseek`), are installed by running the following command from the project root:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2.  **Set Up API Keys:**
+    The Streamlit application requires API keys for the LLMs you intend to use. These must be set as environment variables. You can set them in your terminal session (e.g., `export OPENAI_API_KEY='your_key_here'`) or by creating a `.env` file in the project root, which the script attempts to load for local development.
+    Required environment variables for the supported models are:
+    -   `OPENAI_API_KEY`: For OpenAI models.
+    -   `GOOGLE_API_KEY`: For Google Gemini models.
+    -   `ANTHROPIC_API_KEY`: For Anthropic Claude models.
+    -   `DEEPSEEK_API_KEY`: For Deepseek models.
+
+    **Important for Embeddings:** By default, this application uses OpenAI's text embeddings for document processing. Therefore, `OPENAI_API_KEY` must be set and valid, even if you select a different provider (like Gemini, Claude, or Deepseek) for generating chat responses.
 
 **Running the GUI:**
-To start the Streamlit application, navigate to the project's root directory in your terminal and run:
-```bash
-streamlit run gui_chatbot_streamlit.py
-```
-This will typically open the chatbot interface in your default web browser. If it doesn't open automatically, the terminal output will provide a local URL (usually `http://localhost:8501`) that you can navigate to.
+
+1.  Navigate to the project's root directory in your terminal.
+2.  Run the Streamlit application using:
+    ```bash
+    streamlit run gui_chatbot_streamlit.py
+    ```
+3.  This will typically open the chatbot interface in your default web browser. If it doesn't open automatically, the terminal output will provide a local URL (usually `http://localhost:8501`) that you can navigate to.
+
+**Selecting the LLM Provider:**
+Once the application is running, you can choose your desired LLM provider (OpenAI, Gemini, Claude, or Deepseek) from the dropdown menu in the sidebar under "⚙️ Configuration". The RAG pipeline will re-initialize with the selected model. Ensure the corresponding API key for your chosen model is correctly set in your environment.
 
 ---
 # AI-Agent

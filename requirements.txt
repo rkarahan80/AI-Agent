@@ -9,3 +9,6 @@ streamlit
 langchain-community
 langchain-openai
 chromadb
+langchain-google-genai
+langchain-anthropic
+langchain-deepseek
